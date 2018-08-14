@@ -173,8 +173,34 @@ class TodoApp extends React.Component {
               this.destroy(t);
             }
           }, "Delete"),
+          e("input", {
+            id: "comment",
+            type: "text",
+            placeholder: "comment",
+            value: editText,
+            onKeyDown: event => {
+              if (event.key === 13) {
+                return fetch("/api/todos/toggle", {
+                  credentials: "same-origin",
+                  method: "PUT",
+                  headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    "X-CSRF-Token": this.token
+                  },
+                  body: JSON.stringify(todoToToggle),
+                })
+                  .then(() => {
+                    this.setState({
+                      todos: todos.map(todo => {
+                        return todo !== todoToToggle ? todo : Object.assign({}, todo, { completed: !todo.completed });
+                      })
+                    });
+                  });
+              }
+            }
+          })
         ),
-        e("input", { className: "edit", value: editText }),
       );
     });
   }
@@ -212,7 +238,7 @@ class TodoApp extends React.Component {
         e("button", {
           onClick: () => {
             this.state.todos.forEach(e => {
-              if( e.completed  === true ) {
+              if (e.completed === true) {
                 this.destroy(e)
               }
             })

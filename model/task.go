@@ -11,12 +11,14 @@ import (
 type Todo struct {
 	ID        int64      `db:"todo_id" json:"id"`
 	Title     string     `json:"title"`
+	Comment   *string    `json:"comment"`
 	Completed bool       `json:"completed"`
 	Created   *time.Time `json:"created"`
 	Updated   *time.Time `json:"updated"`
 }
 
-func TodosAll(dbx *sqlx.DB) (todos []Todo, err error) {
+func TodosAll(dbx *sqlx.DB) ([]Todo, error) {
+	var todos []Todo
 	if err := dbx.Select(&todos, "select * from todos"); err != nil {
 		return nil, err
 	}
@@ -28,6 +30,16 @@ func TodoOne(dbx *sqlx.DB, id int64) (*Todo, error) {
 	if err := dbx.Get(&todo, `
 	select * from todos where todo_id = ?
 	`, id); err != nil {
+		return nil, err
+	}
+	return &todo, nil
+}
+
+func TodoFromTitleOne(dbx *sqlx.DB, title string) (*Todo, error) {
+	var todo Todo
+	if err := dbx.Get(&todo, `
+	select * from todos where title = ?
+	`, title); err != nil {
 		return nil, err
 	}
 	return &todo, nil

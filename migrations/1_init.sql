@@ -2,6 +2,7 @@
 CREATE TABLE `todos` (
   `todo_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID',
   `title` varchar(256) NOT NULL COMMENT 'タスクのタイトル',
+  `comment` varchar(256) DEFAULT NULL COMMENT 'コメント',
   `completed` BOOL NOT NULL DEFAULT FALSE COMMENT 'タスクが完了したか否か',
   `created` datetime NOT NULL DEFAULT NOW() COMMENT '登録日',
   `updated` datetime DEFAULT NULL COMMENT '更新日',

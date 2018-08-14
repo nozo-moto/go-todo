@@ -20,7 +20,7 @@ func (t *Todo) Get(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	return JSON(w, 200, todos)
+	return JSON(w, http.StatusOK, todos)
 }
 
 func (t *Todo) Put(w http.ResponseWriter, r *http.Request) error {
@@ -106,4 +106,13 @@ func (t *Todo) Toggle(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	return JSON(w, http.StatusOK, nil)
+}
+
+func (t *Todo) Search(w http.ResponseWriter, r *http.Request) error {
+	title := r.FormValue("title")
+	todo, err := model.TodoFromTitleOne(t.DB, title)
+	if err != nil {
+		return JSON(w, http.StatusOK, nil)
+	}
+	return JSON(w, http.StatusOK, todo)
 }
