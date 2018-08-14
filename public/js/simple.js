@@ -7,6 +7,7 @@ class TodoApp extends React.Component {
       newTodo: "",
       todos: [],
       editText: "",
+      allcheck: false,
     };
 
     this.token = this.fetchToken();
@@ -14,7 +15,7 @@ class TodoApp extends React.Component {
   }
 
   fetchToken() {
-    fetch("/token", {credentials: "same-origin"})
+    fetch("/token", { credentials: "same-origin" })
       .then(x => x.json())
       .then(json => {
         if (json === null) {
@@ -50,7 +51,7 @@ class TodoApp extends React.Component {
         if (json === null) {
           return;
         }
-        this.setState({todos: json});
+        this.setState({ todos: json });
       });
   }
 
@@ -58,7 +59,7 @@ class TodoApp extends React.Component {
     if (title === "") {
       return;
     }
-    const todo = {title: title, completed: false};
+    const todo = { title: title, completed: false };
 
     return fetch("/api/todos", {
       credentials: "same-origin",
@@ -90,7 +91,7 @@ class TodoApp extends React.Component {
   }
 
   destroy(todo) {
-    const {todos} = this.state;
+    const { todos } = this.state;
 
     return fetch("/api/todos", {
       credentials: "same-origin",
@@ -104,14 +105,14 @@ class TodoApp extends React.Component {
     }).then(() => {
       this.setState({
         todos: todos.filter(candidate => {
-            return candidate !== todo;
+          return candidate !== todo;
         })
       });
     });
   }
 
   toggle(todoToToggle) {
-    const {todos} = this.state;
+    const { todos } = this.state;
 
     return fetch("/api/todos/toggle", {
       credentials: "same-origin",
@@ -132,20 +133,39 @@ class TodoApp extends React.Component {
       });
   }
 
+  toggleALL(todoToToggle) {
+    const { todos } = this.state;
+
+    return fetch("/api/todos/toggle", {
+      credentials: "same-origin",
+      method: "PUT",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "X-CSRF-Token": this.token
+      },
+      body: JSON.stringify(todoToToggle),
+    })
+      .then(() => {
+        this.setState({
+          todos: todos.map(todo => {
+            return todo !== todoToToggle ? todo : Object.assign({}, todo, { completed: todo.completed });
+          })
+        });
+      });
+  }
+
   renderTodos() {
-    const {todos, editText} = this.state;
+    const { todos, editText } = this.state;
 
     return todos.map(t => {
-      return e("li", {key: t.id},
-        e("div", {className: "view"},
-          e("input", {className: "toggle", type: "checkbox", checked: t.completed, onChange: () => {
-            if (t.completed === true) {
-              t.completed = false
-            } else {
-              t.completed = true
+      return e("li", { key: t.id },
+        e("div", { className: "view" },
+          e("input", {
+            className: "toggle", type: "checkbox", checked: t.completed, onChange: () => {
+              this.toggle(t);
             }
-            this.toggle(t);
-          }}),
+          }),
           e("label", {}, t.title),
           e("button", {
             className: "destroy",
@@ -154,34 +174,54 @@ class TodoApp extends React.Component {
             }
           }, "Delete"),
         ),
-        e("input", {className: "edit", value: editText}),
+        e("input", { className: "edit", value: editText }),
       );
     });
   }
 
   render() {
-    const {newTodo} = this.state;
+    const { newTodo } = this.state;
 
     return e("div", {},
-      e("header", {id: "header"},
+      e("header", { id: "header" },
         e("input", {
           id: "new-todo",
           placeholder: "What needs to be done?",
           value: newTodo,
           autoFocus: true,
           onChange: event => {
-            this.setState({newTodo: event.target.value});
+            this.setState({ newTodo: event.target.value });
           }
         }),
         e("button", {
-            onClick: () => {
-              this.addTodo(newTodo);
-            }
-          },
+          onClick: () => {
+            this.addTodo(newTodo);
+          }
+        },
           "Add"
         ),
+        e("input", {
+          className: "checkAllToggle", type: "checkbox", checked: this.state.allcheck, onChange: () => {
+            console.log(this.state.todos)
+            this.state.todos.forEach(element => {
+              element.completed = true
+              this.toggleALL(element);
+            });
+          }
+        }),
+        e("button", {
+          onClick: () => {
+            this.state.todos.forEach(e => {
+              if( e.completed  === true ) {
+                this.destroy(e)
+              }
+            })
+          }
+        },
+          "Delete Checktd"
+        ),
       ),
-      e("div", {}, e("ul", {id: "todo-list"}, this.renderTodos()),
+      e("div", {}, e("ul", { id: "todo-list" }, this.renderTodos()),
       ),
     );
   }

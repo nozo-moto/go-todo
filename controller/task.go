@@ -105,6 +105,5 @@ func (t *Todo) Toggle(w http.ResponseWriter, r *http.Request) error {
 	}); err != nil {
 		return err
 	}
-
 	return JSON(w, http.StatusOK, nil)
 }
