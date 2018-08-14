@@ -113,9 +113,9 @@ class TodoApp extends React.Component {
   toggle(todoToToggle) {
     const {todos} = this.state;
 
-    return fetch("/api/todos/togle", {
+    return fetch("/api/todos/toggle", {
       credentials: "same-origin",
-      method: "POST",
+      method: "PUT",
       headers: {
         "Accept": "application/json",
         "Content-Type": "application/json",
@@ -139,6 +139,11 @@ class TodoApp extends React.Component {
       return e("li", {key: t.id},
         e("div", {className: "view"},
           e("input", {className: "toggle", type: "checkbox", checked: t.completed, onChange: () => {
+            if (t.completed === true) {
+              t.completed = false
+            } else {
+              t.completed = true
+            }
             this.toggle(t);
           }}),
           e("label", {}, t.title),

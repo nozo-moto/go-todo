@@ -53,6 +53,7 @@ func (t *Todo) Update(tx *sqlx.Tx) (sql.Result, error) {
 		return nil, err
 	}
 	defer stmt.Close()
+
 	return stmt.Exec(t.Title, t.ID)
 }
 
